@@ -17,7 +17,9 @@ public static class Formatter
     public static string FormatCurrency(decimal amount, string currencyCode = "USD", string cultureName = "es-MX")
     {
         if (string.IsNullOrWhiteSpace(currencyCode))
+        {
             throw new ArgumentException("El código de moneda no puede estar vacío.", nameof(currencyCode));
+        }
 
         var culture = new CultureInfo(cultureName);
         var regionInfo = new RegionInfo(cultureName);
@@ -36,7 +38,9 @@ public static class Formatter
     public static string FormatPercentage(decimal value, int decimalPlaces = 2)
     {
         if (decimalPlaces < 0)
+        {
             throw new ArgumentException("Los decimales no pueden ser negativos.", nameof(decimalPlaces));
+        }
 
         return $"{(value * 100).ToString($"F{decimalPlaces}")}%";
     }
@@ -50,7 +54,9 @@ public static class Formatter
     public static string FormatNumber(decimal value, int decimalPlaces = 0, string cultureName = "es-MX")
     {
         if (decimalPlaces < 0)
+        {
             throw new ArgumentException("Los decimales no pueden ser negativos.", nameof(decimalPlaces));
+        }
 
         var culture = new CultureInfo(cultureName);
         return value.ToString($"N{decimalPlaces}", culture);
@@ -64,7 +70,9 @@ public static class Formatter
     public static decimal TruncateDecimals(decimal value, int decimalPlaces)
     {
         if (decimalPlaces < 0)
+        {
             throw new ArgumentException("Los decimales no pueden ser negativos.", nameof(decimalPlaces));
+        }
 
         var factor = (decimal)Math.Pow(10, decimalPlaces);
         return Math.Truncate(value * factor) / factor;

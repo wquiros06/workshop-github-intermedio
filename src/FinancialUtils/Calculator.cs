@@ -29,7 +29,9 @@ public static class Calculator
     public static decimal Divide(decimal a, decimal b)
     {
         if (b == 0)
+        {
             throw new DivideByZeroException("El divisor no puede ser cero.");
+        }
 
         return a / b;
     }
@@ -46,13 +48,19 @@ public static class Calculator
     public static decimal CompoundInterest(decimal principal, decimal rate, int periods)
     {
         if (principal < 0)
+        {
             throw new ArgumentException("El capital no puede ser negativo.", nameof(principal));
+        }
 
         if (rate < 0)
+        {
             throw new ArgumentException("La tasa no puede ser negativa.", nameof(rate));
+        }
 
         if (periods < 1)
+        {
             throw new ArgumentException("Los periodos deben ser un entero positivo.", nameof(periods));
+        }
 
         return principal * (decimal)Math.Pow((double)(1 + rate), periods);
     }
@@ -69,16 +77,24 @@ public static class Calculator
     public static decimal LoanPayment(decimal principal, decimal annualRate, int months)
     {
         if (principal <= 0)
+        {
             throw new ArgumentException("El préstamo debe ser mayor a cero.", nameof(principal));
+        }
 
         if (annualRate < 0)
+        {
             throw new ArgumentException("La tasa no puede ser negativa.", nameof(annualRate));
+        }
 
         if (months < 1)
+        {
             throw new ArgumentException("El plazo debe ser un entero positivo.", nameof(months));
+        }
 
         if (annualRate == 0)
+        {
             return Math.Round(principal / months, 2, MidpointRounding.AwayFromZero);
+        }
 
         var monthlyRate = annualRate / 12;
         var factor = (decimal)Math.Pow((double)(1 + monthlyRate), months);
@@ -103,7 +119,9 @@ public static class Calculator
             ?? throw new ArgumentNullException(nameof(cashFlows));
 
         if (flows.Count == 0)
+        {
             throw new ArgumentException("Se requiere al menos un flujo de caja.", nameof(cashFlows));
+        }
 
         decimal npv = 0;
         for (int t = 0; t < flows.Count; t++)
