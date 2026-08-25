@@ -1,0 +1,43 @@
+# Versión corregida de laboratorio/recursos/workflow-roto.yml
+# Las 4 correcciones están marcadas con CORREGIDO.
+
+name: CI Roto
+
+on:
+  push:
+    branches:            # CORREGIDO 1: la clave es `branches`, no `branch`
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest   # CORREGIDO 2: la etiqueta es ubuntu-latest, no ubuntu-latests
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '9.0.x'
+
+      - run: dotnet restore
+      - run: dotnet build --configuration Release --no-restore
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build             # CORREGIDO 3: el job se llama `build`, no `compilar`
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '9.0.x'
+
+      - run: dotnet restore
+      - run: dotnet test --results-directory ./resultados
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: resultados-de-pruebas
+          path: ./resultados   # CORREGIDO 4: la ruta debe coincidir con --results-directory

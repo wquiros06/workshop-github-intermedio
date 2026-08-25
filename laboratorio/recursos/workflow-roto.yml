@@ -1,0 +1,48 @@
+# ARCHIVO DE PRÁCTICA. No lo copies a .github/workflows todavía.
+#
+# Tiene 4 errores intencionales. Los cuatro son de configuración, no de lógica.
+# Los cuatro son errores que se ven en repositorios reales todo el tiempo.
+#
+# Encuéntralos leyendo, sin ejecutar nada. Anótalos antes de abrir la solución
+# en soluciones/respuestas.md.
+
+name: CI Roto
+
+on:
+  push:
+    branch:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latests
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '9.0.x'
+
+      - run: dotnet restore
+      - run: dotnet build --configuration Release --no-restore
+
+  test:
+    runs-on: ubuntu-latest
+    needs: compilar
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '9.0.x'
+
+      - run: dotnet restore
+      - run: dotnet test --results-directory ./resultados
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: resultados-de-pruebas
+          path: ./TestResults

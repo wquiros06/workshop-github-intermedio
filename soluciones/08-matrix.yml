@@ -1,0 +1,52 @@
+# Solución del laboratorio 08 (opcional): matrix strategy.
+#
+# Antes de copiar esto a un proyecto real, haz la cuenta. Cada combinación es
+# un runner completo. Windows consume el doble de minutos que Linux y macOS diez
+# veces más, así que una matriz de 3 sistemas por 3 versiones no cuesta 9 veces
+# lo que un job: cuesta bastante más.
+#
+# En repositorios públicos con runners estándar los minutos son gratis, pero en
+# repositorios privados esto se paga.
+
+name: 08 - Matrix
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: 'true'
+
+jobs:
+  probar:
+    name: .NET ${{ matrix.dotnet }} en ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      # Con fail-fast en false, una combinación rota no cancela las demás.
+      # Es lo que quieres cuando estás diagnosticando: necesitas saber si falla
+      # en todas o solo en una.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        dotnet: ['9.0.x']
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v7
+
+      - name: Instalar el SDK de .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ matrix.dotnet }}
+
+      - name: Restaurar
+        run: dotnet restore
+
+      - name: Compilar
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Probar
+        run: dotnet test --configuration Release --no-build

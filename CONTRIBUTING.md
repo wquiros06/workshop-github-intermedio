@@ -1,28 +1,37 @@
-# 🤝 Contribuir a este Workshop
+# Contribuir
 
-¡Gracias por tu interés en mejorar este workshop! Aquí te explicamos cómo colaborar.
+Este repositorio es material de workshop. Las contribuciones más útiles son las
+correcciones que encontraste impartiéndolo o tomándolo.
 
-## Cómo contribuir
+## Qué reportar
 
-1. Crea una rama descriptiva desde `main`: `git checkout -b mejora/nombre-descriptivo`
-2. Haz tus cambios siguiendo las convenciones del proyecto
-3. Asegúrate de que los tests pasen: `dotnet test`
-4. Crea un Pull Request con descripción clara
+- Un paso del laboratorio que no funciona como está escrito
+- Una versión de acción o de SDK que quedó desactualizada
+- Un error que tus participantes cometieron y que no está en la tabla de
+  "Cuando algo falla" del ejercicio correspondiente
 
-## Convenciones
+Ese último tipo de reporte es el más valioso. Cada error real que se documenta
+son minutos que la siguiente persona no pierde.
 
-- **Commits**: Usa [Conventional Commits](https://www.conventionalcommits.org/) — `fix:`, `feat:`, `docs:`
-- **Español**: Todo el contenido del workshop está en español
-- **Markdown**: Usa encabezados jerárquicos y bloques de código con lenguaje especificado
-- **Formato**: Ejecuta `dotnet format` antes de hacer commit de código C#
+## Cómo
 
-## ¿Qué puedes aportar?
+1. Crea una rama con el prefijo `lab/` o `fix/`
+2. Haz tus cambios
+3. Verifica que el proyecto sigue compilando: `bash scripts/verificar-entorno.sh`
+4. Abre un pull request describiendo el problema que resuelve
 
-- Corregir errores o typos en los ejercicios
-- Mejorar explicaciones o agregar ejemplos
-- Agregar ejercicios complementarios
-- Reportar problemas o sugerencias como Issues
+## Estilo
 
-## Código de conducta
+- Español neutro, sin regionalismos
+- Segunda persona ("vas a", "verifica"), consistente con el resto del material
+- Los comandos deben poder copiarse y pegarse tal cual
+- Cada afirmación sobre el comportamiento de la plataforma va con enlace a la
+  documentación oficial
+- Nada de "es muy fácil" ni "simplemente". Si fuera fácil no harías el workshop
 
-Sé respetuoso y constructivo. Este es un recurso educativo abierto para la comunidad.
+## Cambios en los workflows
+
+Si modificas un YAML de `.github/workflows/`, actualiza también el archivo
+correspondiente en `soluciones/`. Se desincronizan con facilidad y un
+participante que copia una solución desactualizada pierde más tiempo que si no
+existiera.

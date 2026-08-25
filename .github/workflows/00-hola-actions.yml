@@ -1,0 +1,38 @@
+# Primer workflow del laboratorio.
+#
+# No compila nada. Solo existe para que veas la anatomía mínima de un workflow
+# y para que entiendas dónde vive cada pieza antes de agregar complejidad.
+#
+# Se dispara únicamente de forma manual (workflow_dispatch), así que no consume
+# minutos hasta que tú lo ejecutes desde la pestaña Actions.
+
+name: 00 - Hola Actions
+
+on:
+  workflow_dispatch:
+
+# Least privilege. Este workflow no lee ni escribe nada del repositorio,
+# así que le quitamos todos los permisos al GITHUB_TOKEN.
+permissions: {}
+
+jobs:
+  saludo:
+    name: Saludo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Imprimir un mensaje
+        run: echo "Hola desde GitHub Actions"
+
+      - name: Ver el contexto de ejecución
+        run: |
+          echo "Sistema operativo del runner : $RUNNER_OS"
+          echo "Repositorio                  : $GITHUB_REPOSITORY"
+          echo "Rama o tag                   : $GITHUB_REF_NAME"
+          echo "Evento que disparó el run    : $GITHUB_EVENT_NAME"
+          echo "Usuario que lo ejecutó       : $GITHUB_ACTOR"
+
+      - name: Escribir en el resumen del run
+        run: |
+          echo "### Mi primer workflow" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Ejecutado por **$GITHUB_ACTOR** sobre la rama \`$GITHUB_REF_NAME\`." >> "$GITHUB_STEP_SUMMARY"

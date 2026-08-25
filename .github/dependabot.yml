@@ -1,0 +1,23 @@
+# Dependabot mantiene actualizadas las versiones de las acciones que usas.
+#
+# Las acciones oficiales suben de major con frecuencia (cambios de runtime de
+# Node, sobre todo). Un workflow con actions/checkout@v3 sigue corriendo, pero
+# eventualmente GitHub deprecia el runtime y el job empieza a fallar sin que
+# nadie haya tocado el YAML. Esto lo evita.
+
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: 'ci'
+
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'deps'

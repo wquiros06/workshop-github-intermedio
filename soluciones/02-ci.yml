@@ -1,0 +1,48 @@
+# Estado esperado de .github/workflows/01-ci.yml al terminar el laboratorio 02.
+# Es el archivo que ya viene en el repo. No cambia nada todavía.
+
+name: 01 - CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'lab/**'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  DOTNET_NOLOGO: 'true'
+  DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-y-test:
+    name: Build y test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código al runner
+        uses: actions/checkout@v7
+
+      - name: Instalar el SDK de .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restaurar dependencias
+        run: dotnet restore
+
+      - name: Compilar en Release
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Ejecutar pruebas
+        run: dotnet test --configuration Release --no-build --verbosity normal

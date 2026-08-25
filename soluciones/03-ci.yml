@@ -1,0 +1,83 @@
+# Estado esperado de .github/workflows/01-ci.yml al terminar el laboratorio 03.
+# Cambios respecto al 02: se agregan artefactos y resumen del run.
+
+name: 01 - CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'lab/**'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  DOTNET_NOLOGO: 'true'
+  DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-y-test:
+    name: Build y test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código al runner
+        uses: actions/checkout@v7
+
+      - name: Instalar el SDK de .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restaurar dependencias
+        run: dotnet restore
+
+      - name: Compilar en Release
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Ejecutar pruebas
+        run: |
+          dotnet test \
+            --configuration Release \
+            --no-build \
+            --logger "trx;LogFileName=resultados.trx" \
+            --results-directory ./resultados
+
+      # if: always() hace que el artefacto se suba incluso si las pruebas
+      # fallaron. Es justo cuando más necesitas ver el reporte.
+      - name: Publicar resultados de pruebas
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: resultados-de-pruebas
+          path: ./resultados
+          retention-days: 5
+          if-no-files-found: error
+
+      - name: Escribir el resumen del run
+        if: always()
+        run: |
+          TRX=$(find ./resultados -name '*.trx' | head -1)
+          TOTAL=$(grep -o 'total="[0-9]*"' "$TRX" | head -1 | grep -o '[0-9]*')
+          PASADAS=$(grep -o 'passed="[0-9]*"' "$TRX" | head -1 | grep -o '[0-9]*')
+          FALLIDAS=$(grep -o 'failed="[0-9]*"' "$TRX" | head -1 | grep -o '[0-9]*')
+          {
+            echo "### Resultado de las pruebas"
+            echo ""
+            echo "| Métrica | Valor |"
+            echo "|---------|-------|"
+            echo "| Total    | ${TOTAL:-0} |"
+            echo "| Pasadas  | ${PASADAS:-0} |"
+            echo "| Fallidas | ${FALLIDAS:-0} |"
+            echo ""
+            echo "Commit: \`${GITHUB_SHA:0:7}\` en \`$GITHUB_REF_NAME\`"
+          } >> "$GITHUB_STEP_SUMMARY"

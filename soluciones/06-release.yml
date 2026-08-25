@@ -1,0 +1,53 @@
+# Solución del laboratorio 06 (opcional): crear un GitHub Release automático
+# cuando se empuja un tag con formato v*.
+#
+# Fíjate en `permissions: contents: write`. Sin eso el job falla con 403 al
+# intentar crear el release. Es el error número uno cuando alguien copia este
+# workflow de un blog.
+
+name: 06 - Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  DOTNET_NOLOGO: 'true'
+
+jobs:
+  release:
+    name: Publicar release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v7
+        with:
+          # Necesario para que las notas automáticas puedan comparar contra
+          # el tag anterior.
+          fetch-depth: 0
+
+      - name: Instalar el SDK de .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Empaquetar la librería
+        run: |
+          dotnet pack src/FinancialUtils/FinancialUtils.csproj \
+            --configuration Release \
+            -p:PackageVersion=${GITHUB_REF_NAME#v} \
+            --output ./paquete
+
+      - name: Crear el release con el paquete adjunto
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            ./paquete/*.nupkg \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes

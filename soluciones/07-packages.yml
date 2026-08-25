@@ -1,0 +1,60 @@
+# Solución del laboratorio 07 (opcional): publicar el paquete NuGet a
+# GitHub Packages.
+#
+# Dos cosas que fallan siempre aquí:
+#   1. Falta `permissions: packages: write`.
+#   2. La fuente de NuGet apunta al usuario equivocado. El owner de la URL
+#      debe ser el dueño del repositorio, no tu usuario personal si el repo
+#      está en una organización.
+
+name: 07 - Publicar paquete
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  DOTNET_NOLOGO: 'true'
+
+jobs:
+  publicar:
+    name: Publicar en GitHub Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v7
+
+      - name: Instalar el SDK de .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Empaquetar
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            VERSION="0.0.${GITHUB_RUN_NUMBER}"
+          fi
+          echo "Versión a publicar: $VERSION"
+          dotnet pack src/FinancialUtils/FinancialUtils.csproj \
+            --configuration Release \
+            -p:PackageVersion="$VERSION" \
+            --output ./paquete
+
+      - name: Registrar la fuente de GitHub Packages
+        run: |
+          dotnet nuget add source \
+            "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            --name github \
+            --username "${{ github.repository_owner }}" \
+            --password "${{ secrets.GITHUB_TOKEN }}" \
+            --store-password-in-clear-text
+
+      - name: Publicar
+        run: dotnet nuget push ./paquete/*.nupkg --source github --skip-duplicate

@@ -1,0 +1,56 @@
+# Pipeline de integración continua del workshop.
+#
+# Un solo job con pasos en orden. Es deliberadamente simple: si tu primer
+# contacto con Actions es un pipeline de cuatro jobs encadenados, vas a estar
+# depurando YAML en lugar de entender el modelo de ejecución.
+#
+# En el laboratorio 04 le agregas un segundo job y aprendes `needs`.
+
+name: 01 - CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'lab/**'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  DOTNET_NOLOGO: 'true'
+  DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
+
+# Si haces varios push seguidos a la misma rama, cancela el run anterior.
+# Ahorra minutos y evita que revises logs de una versión vieja del código.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-y-test:
+    name: Build y test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el código al runner
+        uses: actions/checkout@v7
+
+      - name: Instalar el SDK de .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restaurar dependencias
+        run: dotnet restore
+
+      - name: Compilar en Release
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Ejecutar pruebas
+        run: dotnet test --configuration Release --no-build --verbosity normal

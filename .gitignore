@@ -21,3 +21,8 @@ TestResults/
 # OS
 .DS_Store
 Thumbs.db
+
+# Carpetas generadas por los ejercicios del laboratorio
+resultados/
+descarga/
+paquete/
